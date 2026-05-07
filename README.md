@@ -3,7 +3,7 @@ title: "FEMA Data Doc"
 output: html_notebook
 ---
 
-## Question (Impact): Is there an emerging pattern of increasing delays for federal disaster response?
+## Question: Is there an emerging pattern of increasing delays for federal disaster response?
 
 ## Data Sets: Disaster Declarations Summaries v2: <https://drive.google.com/file/d/1YhwtLE-e428HYR-CLruthPc3VHoWb2cg/view?usp=sharing>
 
@@ -44,7 +44,7 @@ df_FEMA_clean <- df_FEMA_OG %>%
 
 ---
 
-## Checking incidentId vs. string filtering (Professor's note)
+## Checking incidentId vs. string filtering
 
 Filtering by name string catches an older storm also named Helene. Used `incidentId`.
 
