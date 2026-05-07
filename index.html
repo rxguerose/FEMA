@@ -1,327 +1,270 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measuring Delays in Federal Major Disaster Declarations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink:       #1a1a18;
+      --paper:     #f5f2eb;
+      --accent:    #b5471b;
+      --rule:      #c8c2b4;
+      --muted:     #6b6558;
+      --highlight: #e8e2d6;
+    }
 
-<meta charset="utf-8" />
-<meta name="generator" content="pandoc" />
-<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    html { font-size: 17px; }
 
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Source Sans 3", sans-serif;
+      font-weight: 300;
+      line-height: 1.75;
+    }
 
+    .page-wrap {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 5rem 2rem 8rem;
+    }
 
-<title>fema_methodology.knit</title>
+    /* Header */
+    .site-header {
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 2rem;
+      margin-bottom: 3rem;
+    }
 
-<script>//
-document.addEventListener('DOMContentLoaded', function(e) {
-  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
-  var i, h, a;
-  for (i = 0; i < hs.length; i++) {
-    h = hs[i];
-    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
-    a = h.attributes;
-    while (a.length > 0) h.removeAttribute(a[0].name);
-  }
-});
-</script>
+    .eyebrow {
+      font-family: "DM Mono", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
 
-<style type="text/css">
-code{white-space: pre-wrap;}
-span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-ul.task-list{list-style: none;}
-</style>
+    h1 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
 
+    .subtitle {
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 580px;
+    }
 
+    /* Section labels */
+    .section-label {
+      font-family: "DM Mono", monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
 
+    /* Method blocks */
+    .method-block {
+      margin-bottom: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--rule);
+    }
 
+    .method-block:last-of-type {
+      border-bottom: none;
+    }
 
+    .method-block h2 {
+      font-family: "Libre Baskerville", Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+      padding-left: 1rem;
+      border-left: 3px solid var(--accent);
+    }
 
+    .method-block p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--ink);
+    }
 
+    /* Inline code */
+    code {
+      font-family: "DM Mono", monospace;
+      font-size: 0.82rem;
+      background: var(--highlight);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 0.05em 0.35em;
+      color: var(--ink);
+    }
 
+    /* Limitations box */
+    .limitations-box {
+      background: var(--highlight);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--muted);
+      border-radius: 2px;
+      padding: 1.5rem 1.75rem;
+      margin-top: 3rem;
+    }
 
+    .limitations-box .section-label {
+      margin-bottom: 1rem;
+    }
 
+    .limitation-item {
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--rule);
+      font-size: 0.97rem;
+      line-height: 1.7;
+    }
 
+    .limitation-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .limitation-item strong {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* Data source strip */
+    .data-strip {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 1rem 1.5rem;
+      border-radius: 2px;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .data-strip .ds-label {
+      font-family: "DM Mono", monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      white-space: nowrap;
+    }
+
+    .data-strip .ds-name {
+      font-family: "Libre Baskerville", serif;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+
+    .data-strip a {
+      font-family: "DM Mono", monospace;
+      font-size: 0.72rem;
+      color: var(--paper);
+      opacity: 0.7;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(245,242,235,0.3);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .data-strip a:hover { opacity: 1; }
+
+    /* Footer */
+    .site-footer {
+      margin-top: 5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+      font-family: "DM Mono", monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  </style>
 </head>
-
 <body>
 
-
-
-
-
-
-
-<style>
-Host not in allowlist:root {
---ink: #1a1a18;
---paper: #f5f2eb;
---accent: #b5471b;
---rule: #c8c2b4;
---muted: #6b6558;
---highlight: #e8e2d6;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 17px; }
-body {
-background: var(--paper);
-color: var(--ink);
-font-family: "Source Sans 3", sans-serif;
-font-weight: 300;
-line-height: 1.75;
-padding: 0;
-margin: 0;
-}
-.page-wrap {
-max-width: 740px;
-margin: 0 auto;
-padding: 5rem 2rem 8rem;
-}
-/* <U+2500><U+2500> Header <U+2500><U+2500> */
-  .site-header {
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 2rem;
-    margin-bottom: 3rem;
-  }
-
-  .eyebrow {
-    font-family: "DM Mono", monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.75rem;
-  }
-
-  h1 {
-    font-family: "Libre Baskerville", Georgia, serif;
-    font-size: 2.1rem;
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--ink);
-    margin-bottom: 1rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-    color: var(--muted);
-    font-weight: 300;
-    max-width: 580px;
-  }
-
-  /* <U+2500><U+2500> Section labels <U+2500><U+2500> */
-  .section-label {
-    font-family: "DM Mono", monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.5rem;
-    display: block;
-  }
-
-  /* <U+2500><U+2500> Main methodology sections <U+2500><U+2500> */
-  .method-block {
-    margin-bottom: 3rem;
-    padding-bottom: 3rem;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .method-block:last-of-type {
-    border-bottom: none;
-  }
-
-  .method-block h2 {
-    font-family: "Libre Baskerville", Georgia, serif;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--ink);
-    margin-bottom: 0.75rem;
-    padding-left: 1rem;
-    border-left: 3px solid var(--accent);
-  }
-
-  .method-block p {
-    font-size: 1rem;
-    line-height: 1.8;
-    color: var(--ink);
-  }
-
-  /* <U+2500><U+2500> Inline code <U+2500><U+2500> */
-  code {
-    font-family: "DM Mono", monospace;
-    font-size: 0.82rem;
-    background: var(--highlight);
-    border: 1px solid var(--rule);
-    border-radius: 3px;
-    padding: 0.05em 0.35em;
-    color: var(--ink);
-  }
-
-  /* <U+2500><U+2500> Limitations box <U+2500><U+2500> */
-  .limitations-box {
-    background: var(--highlight);
-    border: 1px solid var(--rule);
-    border-left: 4px solid var(--muted);
-    border-radius: 2px;
-    padding: 1.5rem 1.75rem;
-    margin-top: 3rem;
-  }
-
-  .limitations-box .section-label {
-    margin-bottom: 1rem;
-  }
-
-  .limitation-item {
-    padding: 0.65rem 0;
-    border-bottom: 1px solid var(--rule);
-    font-size: 0.97rem;
-    line-height: 1.7;
-  }
-
-  .limitation-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .limitation-item strong {
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  /* <U+2500><U+2500> Data source strip <U+2500><U+2500> */
-  .data-strip {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    background: var(--ink);
-    color: var(--paper);
-    padding: 1rem 1.5rem;
-    border-radius: 2px;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-  }
-
-  .data-strip .ds-label {
-    font-family: "DM Mono", monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    opacity: 0.6;
-    white-space: nowrap;
-  }
-
-  .data-strip .ds-name {
-    font-family: "Libre Baskerville", serif;
-    font-size: 0.95rem;
-    font-style: italic;
-  }
-
-  .data-strip a {
-    font-family: "DM Mono", monospace;
-    font-size: 0.72rem;
-    color: var(--paper);
-    opacity: 0.7;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(245,242,235,0.3);
-    margin-left: auto;
-    white-space: nowrap;
-  }
-
-  .data-strip a:hover { opacity: 1; }
-
-  /* <U+2500><U+2500> Footer <U+2500><U+2500> */
-  .site-footer {
-    margin-top: 5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--rule);
-    font-family: "DM Mono", monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.05em;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-</style>
 <div class="page-wrap">
-<header class="site-header">
-<p class="eyebrow">
-Data Methodology
-</p>
-<h1>
-Federal Disaster Response:<br>Measuring Declaration Lag
-</h1>
-<p class="subtitle">
-An analysis of FEMA Major Disaster Declarations from the Eisenhower
-administration to the present, examining whether response times have
-changed over time.
-</p>
-</header>
-<div class="data-strip">
-<pre><code>&lt;span class=&quot;ds-label&quot;&gt;Dataset&lt;/span&gt;
-&lt;span class=&quot;ds-name&quot;&gt;FEMA Disaster Declarations Summaries v2&lt;/span&gt;
-&lt;a href=&quot;https://drive.google.com/file/d/1YhwtLE-e428HYR-CLruthPc3VHoWb2cg/view?usp=sharing&quot; target=&quot;_blank&quot;&gt;&lt;U+2197&gt; Source data&lt;/a&gt;</code></pre>
-</div>
-<div class="method-block">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;01 &lt;U+2014&gt; Core Variable&lt;/span&gt;
-&lt;h2&gt;Measuring Days to Declaration&lt;/h2&gt;
-&lt;p&gt;The dataset spans the Eisenhower administration to the present, where each row represents a county-level disaster designation. The variable &lt;code&gt;days_to_declaration&lt;/code&gt; measures the number of calendar days between &lt;code&gt;incidentBeginDate&lt;/code&gt; and &lt;code&gt;declarationDate&lt;/code&gt; using &lt;code&gt;difftime()&lt;/code&gt; in R, restricted to Major Disaster Declarations only (&lt;code&gt;declarationType == &quot;DR&quot;&lt;/code&gt;) as these usually indicate more broad federal assistance.&lt;/p&gt;</code></pre>
-</div>
-<div class="method-block">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;02 &lt;U+2014&gt; Data Cleaning&lt;/span&gt;
-&lt;h2&gt;Grouping at the State Level&lt;/h2&gt;
-&lt;p&gt;Because each row is a county designation rather than a unique disaster, the data needed to be cleaned. A check of ~3,000 state-incident combinations found only 13 with variation in declaration dates within a single state, which were nearly all attributable to tribal nations receiving separate, typically later, declarations. The analysis groups at the state level and takes the earliest declaration date within each state-incident group &lt;U+2014&gt; tribal declarations tend to come later and are treated as a separate phenomenon. County-level rows are kept to report minimum, median, and maximum lag per state rather than reducing to a single number. Median is used as the primary statistic over mean to avoid a single outlier county disproportionately skewing state-wide data.&lt;/p&gt;</code></pre>
-</div>
-<div class="method-block">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;03 &lt;U+2014&gt; Storm Selection&lt;/span&gt;
-&lt;h2&gt;Helene and Comparable Storms&lt;/h2&gt;
-&lt;p&gt;Hurricane Helene is isolated by &lt;code&gt;incidentId&lt;/code&gt; rather than name string, as a string search for &quot;helene&quot; returns rows from an older unrelated storm since FEMA reuses storm names. Hurricanes Camille, Floyd, Frances, Ivan, Jeanne, Harvey, Ida, Matthew, and Idalia were selected as comparable storms because of their similar rapid intensification and extreme rainfall. For the comparable storms analysis, both a median and a simple unweighted mean were calculated &lt;U+2014&gt; a weighted average by population or damage estimates would be more rigorous but would require joining an additional dataset. One &lt;code&gt;NA&lt;/code&gt; that appeared in the unweighted mean chart turned out to be Hurricane Ian&amp;rsquo;s Seminole Tribe of Florida declaration, which shared an &lt;code&gt;incidentId&lt;/code&gt; with the broader Ian declaration &lt;U+2014&gt; it is kept labeled separately as &amp;ldquo;Ian - Seminole (2022)&amp;rdquo; in the comparable storms analysis.&lt;/p&gt;</code></pre>
-</div>
-<div class="method-block">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;04 &lt;U+2014&gt; Tribal Declarations&lt;/span&gt;
-&lt;h2&gt;Isolating Tribal Response Lag&lt;/h2&gt;
-&lt;p&gt;For tribal declarations specifically, filtering used both the &lt;code&gt;tribalRequest&lt;/code&gt; flag and a string search across &lt;code&gt;designatedArea&lt;/code&gt; for keywords like &amp;ldquo;indian nation,&amp;rdquo; &amp;ldquo;indian reservation,&amp;rdquo; &amp;ldquo;pueblo,&amp;rdquo; and &amp;ldquo;tribe of.&amp;rdquo; Tribal and non-tribal declarations within the same state-incident were then separated to compare lag differences directly, pivoting the data wide to put tribal and non-tribal days side by side. Florida was also isolated specifically given it has a clear compare/contrast case within the same state.&lt;/p&gt;</code></pre>
-</div>
-<div class="method-block">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;05 &lt;U+2014&gt; Trend Analysis&lt;/span&gt;
-&lt;h2&gt;Patterns Over Time&lt;/h2&gt;
-&lt;p&gt;The overall trend over time was examined for all hurricane and tropical storm DR declarations, plotting &lt;code&gt;days_to_declaration&lt;/code&gt; against &lt;code&gt;incidentBeginDate&lt;/code&gt; with a smoothed trend line. This was then broken down further by decade and by presidential administration using both mean and median.&lt;/p&gt;</code></pre>
-</div>
-<div class="limitations-box">
-<pre><code>&lt;span class=&quot;section-label&quot;&gt;Limitations&lt;/span&gt;
-&lt;div class=&quot;limitation-item&quot;&gt;
-  &lt;strong&gt;Governor request requirement.&lt;/strong&gt; The lag clock starts at incident begin, but FEMA cannot declare until a state governor formally requests it, meaning some delay may reflect state-level decisions rather than federal response time.
-&lt;/div&gt;
-&lt;div class=&quot;limitation-item&quot;&gt;
-  &lt;strong&gt;Pre-NEMIS data entry.&lt;/strong&gt; Data manually entered before the 1998 launch of the National Emergency Management Information System may be subject to a small percentage of human error.
-&lt;/div&gt;</code></pre>
-</div>
-<footer class="site-footer">
-<span>FEMA Disaster Response Analysis</span> <span>Data: FEMA Disaster
-Declarations Summaries v2  &lt;U+00B7&gt;  Analysis in R</span>
-</footer>
-</div>
 
+  <header class="site-header">
+    <p class="eyebrow">Data Methodology</p>
+    <h1>Federal Disaster Response:<br>Measuring Declaration Lag</h1>
+    <p class="subtitle">An analysis of FEMA Major Disaster Declarations from the Eisenhower administration to the present, examining whether response times have changed over time.</p>
+  </header>
 
+  <div class="data-strip">
+    <span class="ds-label">Dataset</span>
+    <span class="ds-name">FEMA Disaster Declarations Summaries v2</span>
+    <a href="https://drive.google.com/file/d/1YhwtLE-e428HYR-CLruthPc3VHoWb2cg/view?usp=sharing" target="_blank">&#8599; Source data</a>
+  </div>
 
-<!-- code folding -->
+  <div class="method-block">
+    <span class="section-label">01 &mdash; Core Variable</span>
+    <h2>Measuring Days to Declaration</h2>
+    <p>The dataset spans the Eisenhower administration to the present, where each row represents a county-level disaster designation. The variable <code>days_to_declaration</code> measures the number of calendar days between <code>incidentBeginDate</code> and <code>declarationDate</code> using <code>difftime()</code> in R, restricted to Major Disaster Declarations only (<code>declarationType == "DR"</code>) as these usually indicate more broad federal assistance.</p>
+  </div>
 
+  <div class="method-block">
+    <span class="section-label">02 &mdash; Data Cleaning</span>
+    <h2>Grouping at the State Level</h2>
+    <p>Because each row is a county designation rather than a unique disaster, the data needed to be cleaned. A check of ~3,000 state-incident combinations found only 13 with variation in declaration dates within a single state, which were nearly all attributable to tribal nations receiving separate, typically later, declarations. The analysis groups at the state level and takes the earliest declaration date within each state-incident group &mdash; tribal declarations tend to come later and are treated as a separate phenomenon. County-level rows are kept to report minimum, median, and maximum lag per state rather than reducing to a single number. Median is used as the primary statistic over mean to avoid a single outlier county disproportionately skewing state-wide data.</p>
+  </div>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
+  <div class="method-block">
+    <span class="section-label">03 &mdash; Storm Selection</span>
+    <h2>Helene and Comparable Storms</h2>
+    <p>Hurricane Helene is isolated by <code>incidentId</code> rather than name string, as a string search for &ldquo;helene&rdquo; returns rows from an older unrelated storm since FEMA reuses storm names. Hurricanes Camille, Floyd, Frances, Ivan, Jeanne, Harvey, Ida, Matthew, and Idalia were selected as comparable storms because of their similar rapid intensification and extreme rainfall. For the comparable storms analysis, both a median and a simple unweighted mean were calculated &mdash; a weighted average by population or damage estimates would be more rigorous but would require joining an additional dataset. One <code>NA</code> that appeared in the unweighted mean chart turned out to be Hurricane Ian&rsquo;s Seminole Tribe of Florida declaration, which shared an <code>incidentId</code> with the broader Ian declaration &mdash; it is kept labeled separately as &ldquo;Ian - Seminole (2022)&rdquo; in the comparable storms analysis.</p>
+  </div>
+
+  <div class="method-block">
+    <span class="section-label">04 &mdash; Tribal Declarations</span>
+    <h2>Isolating Tribal Response Lag</h2>
+    <p>For tribal declarations specifically, filtering used both the <code>tribalRequest</code> flag and a string search across <code>designatedArea</code> for keywords like &ldquo;indian nation,&rdquo; &ldquo;indian reservation,&rdquo; &ldquo;pueblo,&rdquo; and &ldquo;tribe of.&rdquo; Tribal and non-tribal declarations within the same state-incident were then separated to compare lag differences directly, pivoting the data wide to put tribal and non-tribal days side by side. Florida was also isolated specifically given it has a clear compare/contrast case within the same state.</p>
+  </div>
+
+  <div class="method-block">
+    <span class="section-label">05 &mdash; Trend Analysis</span>
+    <h2>Patterns Over Time</h2>
+    <p>The overall trend over time was examined for all hurricane and tropical storm DR declarations, plotting <code>days_to_declaration</code> against <code>incidentBeginDate</code> with a smoothed trend line. This was then broken down further by decade and by presidential administration using both mean and median.</p>
+  </div>
+
+  <div class="limitations-box">
+    <span class="section-label">Limitations</span>
+    <div class="limitation-item">
+      <strong>Governor request requirement.</strong> The lag clock starts at incident begin, but FEMA cannot declare until a state governor formally requests it, meaning some delay may reflect state-level decisions rather than federal response time.
+    </div>
+    <div class="limitation-item">
+      <strong>Pre-NEMIS data entry.</strong> Data manually entered before the 1998 launch of the National Emergency Management Information System may be subject to a small percentage of human error.
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <span>FEMA Disaster Response Analysis</span>
+    <span>Data: FEMA Disaster Declarations Summaries v2 &nbsp;&middot;&nbsp; Analysis in R</span>
+  </footer>
+
+</div>
 
 </body>
 </html>
