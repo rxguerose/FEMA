@@ -4,7 +4,7 @@
 
 
 
-## Methodology (view the prettier HTML version [here](https://rxguerose.github.io/FEMA/))
+## Methodology (view the prettier HTML version [here](https://rxguerose.github.io/FEMA/index))
 
 FEMA's Disaster Declarations Summaries v2, a publicly available dataset spanning the Eisenhower administration to the present, was used for this analysis, where each row represents a county-level disaster designation. The variable days_to_declaration measures the number of calendar days between incidentBeginDate and declarationDate using difftime() in R, restricted to Major Disaster Declarations only (declarationType == "DR") as these usually indicate more broad federal assistance.
 
