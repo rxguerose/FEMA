@@ -1,0 +1,103 @@
+## Translating Data to Datawrapper
+
+# 1. Overall Trend by Decade
+
+# Line graph: one row per decade, median days as the value
+
+```{r}
+storms %>%
+  #getting a look at how storms are named for cleaning purposes
+  select(declarationTitle, incidentBeginDate, state, days_to_declaration) %>%
+  head(20)
+```
+
+```{r dw-overall-trend}
+dw_overall_trend <- storms %>%
+  mutate(
+    storm_name_clean = declarationTitle %>%
+      str_extract("(HURRICANE|TROPICAL STORM) [A-Z]+") %>%
+      #cleaned up the storm names to appear consistent & easy to read in datawrapper
+      str_to_title(),
+    year = year(incidentBeginDate)
+  ) %>%
+  filter(
+    year >= 1998,
+    # Filtered to 1998 onward per pre-NEMIS data limitation
+    !is.na(storm_name_clean)
+  ) %>%
+  mutate(
+    hover_label = paste0(storm_name_clean, " (", state, ", ", year, ", ", days_to_declaration, " days)")
+  ) %>%
+  select(
+    days_to_declaration,
+    year,
+    hover_label
+  ) %>%
+  arrange(year) %>%
+  rename(
+    `Days to Declaration` = days_to_declaration,
+    `Year`                = year,
+    `Storm`               = hover_label
+  )
+
+write.csv(dw_overall_trend, "dw_overall_trend.csv", row.names = FALSE)
+dw_overall_trend
+```
+
+# 2. Helene by State
+
+```{r dw-helene}
+dw_helene <- helene_state_summary %>%
+  select(state, min_lag, median_lag, max_lag) %>%
+  arrange(median_lag) %>%
+  rename(
+    State           = state,
+    `Min Days`      = min_lag,
+    `Median Days`   = median_lag,
+    `Max Days`      = max_lag
+  )
+#ultimately used median days, since all of these declarations had no variation between individual counties
+write.csv(dw_helene, "dw_helene.csv", row.names = FALSE)
+dw_helene
+```
+
+# 3. Tribal vs. Non-Tribal Declaration Lag
+
+# Grouped bar graph: one row per storm-state event
+
+# dw_tribal = all events; dw_tribal_fl = Florida only (which is what was ultimately used)
+
+```{r dw-tribal}
+df_raw <- read.csv("DR_state_tribal_level_same_state_Weather.csv")
+
+dw_tribal <- df_raw %>%
+  mutate(
+    declarationDate     = as_date(declarationDate),
+    incidentBeginDate   = as_date(incidentBeginDate),
+    days_to_declaration = as.numeric(difftime(declarationDate, incidentBeginDate, units = "days")),
+    request_type = case_when(
+      tribalRequest == "Days - Tribal"     ~ "Tribal",
+      tribalRequest == "Days - Not Tribal" ~ "Non-Tribal",
+    ),
+    event_label = paste0(
+      str_to_title(incidentType), " - ",
+      state, " (",
+      format(incidentBeginDate, "%Y"), ")"
+    )
+  ) %>%
+  select(event_label, days_to_declaration, request_type) %>%
+  pivot_wider(
+    names_from  = request_type,
+    values_from = days_to_declaration
+  ) %>%
+  arrange(event_label)
+
+dw_tribal_fl <- dw_tribal %>%
+  filter(str_detect(event_label, "- FL "))
+
+write.csv(dw_tribal,    "dw_tribal.csv",    row.names = FALSE)
+write.csv(dw_tribal_fl, "dw_tribal_fl.csv", row.names = FALSE)
+#in datawrapper, I changed the event label to the storm name by referencing incident IDs associated with these tribal declarations from the Data Doc.
+
+dw_tribal_fl
+```
